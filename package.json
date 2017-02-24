@@ -4,5 +4,8 @@
   "description": "Redis backed social graph",
   "main": "index.js",
   "author": "Shane Vitarana <shanev@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "redis": "^2.6.5"
+  }
 }
