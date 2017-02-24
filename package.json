@@ -1,0 +1,8 @@
+{
+  "name": "redis-social-graph",
+  "version": "1.0.0",
+  "description": "Redis backed social graph",
+  "main": "index.js",
+  "author": "Shane Vitarana <shanev@gmail.com>",
+  "license": "MIT"
+}
