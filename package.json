@@ -8,5 +8,10 @@
   "dependencies": {
     "debug": "^2.6.1",
     "redis": "^2.6.5"
+  },
+  "devDependencies": {
+    "eslint": "^3.16.1",
+    "eslint-config-airbnb-base": "^11.1.0",
+    "eslint-plugin-import": "^2.2.0"
   }
 }
