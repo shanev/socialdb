@@ -6,6 +6,7 @@
   "author": "Shane Vitarana <shanev@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "debug": "^2.6.1",
     "redis": "^2.6.5"
   }
 }
