@@ -10,6 +10,7 @@
     "redis": "^2.6.5"
   },
   "scripts": {
+    "redis": "redis-server /usr/local/etc/redis.conf --notify-keyspace-events Ex",
     "test": "mocha"
   },
   "devDependencies": {

@@ -12,11 +12,10 @@ class SocialGraph {
     return new Promise((resolve) => { resolve(true); });
   }
 
-  followers(userId) {
-    this.redis.smembers(`user:${userId}:followers`, (err, res) => {
-      return new Promise((resolve) => { resolve(res); });
-    });    
-  }
+  // followers(userId, callback) {
+  //   // this.redis.smembers(`user:${userId}:followers`, (err, res) => (callback(res)));
+  //   return callback([1, 2, 3]);
+  // }
 }
 
 module.exports = SocialGraph;
