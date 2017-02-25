@@ -1,10 +1,18 @@
+const debug = require('debug')('redis-social-graph-tests');
+
 const assert = require('assert');
 
 const redis = require('redis');
 
 const client = redis.createClient();
 
-const follow = require('../index.js');
+client.on('error', (err) => {
+  debug.err(err);
+});
+
+const SocialGraph = require('../index.js');
+
+const sg = new SocialGraph(client);
 
 describe('Relationships', () => {
   before(() => {
@@ -13,7 +21,7 @@ describe('Relationships', () => {
 
   describe('#follow()', () => {
     it('should allow you to follow', () => {
-      follow(1, 11).then((success) => {
+      sg.follow(1, 11).then((success) => {
         assert(success);
         client.smembers(`user:${1}:requested`, (err, res) => {
           assert.equal(res[0], 11);
@@ -22,6 +30,12 @@ describe('Relationships', () => {
           assert.equal(res[0], 1);
         });
       });
+    });
+  });
+
+  describe('#followers()', () => {
+    it('should get a list of followers', () => {
+      sg.followers();
     });
   });
 });

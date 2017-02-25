@@ -1,18 +1,22 @@
-const debug = require('debug')('redis-social-graph');
+class SocialGraph {
+  constructor(redis = null) {
+    this.redis = redis;
+  }
 
-const redis = require('redis');
+  follow(fromId, toId) {
+    this.redis.multi()
+      .sadd(`user:${fromId}:requested`, toId)
+      .sadd(`user:${toId}:pending`, fromId)
+      .exec();
 
-const client = redis.createClient();
+    return new Promise((resolve) => { resolve(true); });
+  }
 
-client.on('error', (err) => {
-  debug.err(err);
-});
+  followers(userId) {
+    this.redis.smembers(`user:${userId}:followers`, (err, res) => {
+      return new Promise((resolve) => { resolve(res); });
+    });    
+  }
+}
 
-module.exports = function follow(fromId, toId) {
-  client.multi()
-    .sadd(`user:${fromId}:requested`, toId)
-    .sadd(`user:${toId}:pending`, fromId)
-    .exec();
-
-  return new Promise((resolve) => { resolve(true); });
-};
+module.exports = SocialGraph;
