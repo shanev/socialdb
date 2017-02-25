@@ -13,7 +13,8 @@ describe('Relationships', () => {
 
   describe('#follow()', () => {
     it('should allow you to follow', () => {
-      follow(1, 11).then(() => {
+      follow(1, 11).then((success) => {
+        assert(success);
         client.smembers(`user:${1}:requested`, (err, res) => {
           assert.equal(res[0], 11);
         });
