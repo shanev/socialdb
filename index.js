@@ -30,13 +30,26 @@ class SocialGraph {
    *     user:1:accepted 11
    *     user:11:accepted 1
    */
-  follow(fromId, toId) {
-    this.redis.multi()
-      .sadd(`user:${fromId}:requested`, toId)
-      .sadd(`user:${toId}:pending`, fromId)
-      .exec();
-
-    return new Promise((resolve) => { resolve(true); });
+  follow(fromId, toId, callback) {
+    // check if this is an initial or reciprocal request
+    this.redis.sismember(`user:${fromId}:pending`, toId, (err, res) => {
+      if (res === 0) {
+        // we have an initial request
+        this.redis.multi()
+          .sadd(`user:${fromId}:requested`, toId)
+          .sadd(`user:${toId}:pending`, fromId)
+          .exec();
+        return callback(true);
+      }
+      // we have a reciprocal request
+      this.redis.multi()
+        .srem(`user:${fromId}:pending`, toId)
+        .srem(`user:${toId}:requested`, fromId)
+        .sadd(`user:${toId}:accepted`, fromId)
+        .sadd(`user:${fromId}:accepted`, toId)
+        .exec();
+      return callback(true);
+    });
   }
 
   requested(userId, callback) {
