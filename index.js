@@ -1,15 +1,14 @@
 /*
-  Social graph for user friends and relationships.
-  API:
-    Actions:
-    * follow(fromId, toId)
-    * unfollow(fromId, toId)
+  String constants for Redis keys identifying user's follower states.
+ */
+const STATE_KEY = {
+  pending: 'pending',
+  requested: 'requested',
+  accepted: 'accepted',
+};
 
-    Data:
-    * pending(userId)
-    * requested(userId)
-    * accepted(userId)
-    * friends(userId) (alias of accepted)
+/*
+  Main class for user social graph with friend list and follower status.
  */
 class SocialGraph {
   constructor(redis = null, options = {}) {
@@ -33,38 +32,46 @@ class SocialGraph {
    */
   follow(fromId, toId, callback) {
     // check if this is an initial or reciprocal request
-    this.redis.sismember(`${this.namespace}:${fromId}:pending`, toId, (err, res) => {
+    this.redis.sismember(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, res) => {
       if (res === 0) {
         // we have an initial request
         this.redis.multi()
-          .sadd(`${this.namespace}:${fromId}:requested`, toId)
-          .sadd(`${this.namespace}:${toId}:pending`, fromId)
+          .sadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, toId)
+          .sadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, fromId)
           .exec();
         return callback(true);
       }
       // we have a reciprocal request
       this.redis.multi()
-        .srem(`${this.namespace}:${fromId}:pending`, toId)
-        .srem(`${this.namespace}:${toId}:requested`, fromId)
-        .sadd(`${this.namespace}:${toId}:accepted`, fromId)
-        .sadd(`${this.namespace}:${fromId}:accepted`, toId)
+        .srem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
+        .srem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
+        .sadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
+        .sadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
         .exec();
       return callback(true);
     });
   }
 
+  /*
+    Returns a callback with a list of requested friends for a given `userId`
+   */
   requested(userId, callback) {
-    this.redis.smembers(`${this.namespace}:${userId}:requested`, (err, res) => (callback(res)));
+    this.redis.smembers(`${this.namespace}:${userId}:${STATE_KEY.requested}`, (err, res) => (callback(res)));
   }
 
+  /*
+    Returns a callback with a list of pending friends for a given `userId`
+   */
   pending(userId, callback) {
-    this.redis.smembers(`${this.namespace}:${userId}:pending`, (err, res) => (callback(res)));
+    this.redis.smembers(`${this.namespace}:${userId}:${STATE_KEY.pending}`, (err, res) => (callback(res)));
   }
 
+  /*
+    Returns a callback with a list of accepted friends for a given `userId`
+   */
   accepted(userId, callback) {
-    this.redis.smembers(`${this.namespace}:${userId}:accepted`, (err, res) => (callback(res)));
+    this.redis.smembers(`${this.namespace}:${userId}:${STATE_KEY.accepted}`, (err, res) => (callback(res)));
   }
-
 }
 
 module.exports = SocialGraph;
