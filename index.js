@@ -12,8 +12,9 @@
     * friends(userId) (alias of accepted)
  */
 class SocialGraph {
-  constructor(redis = null) {
+  constructor(redis = null, options = {}) {
     this.redis = redis;
+    this.namespace = options.namespace || 'user';
   }
 
   /**
@@ -32,36 +33,36 @@ class SocialGraph {
    */
   follow(fromId, toId, callback) {
     // check if this is an initial or reciprocal request
-    this.redis.sismember(`user:${fromId}:pending`, toId, (err, res) => {
+    this.redis.sismember(`${this.namespace}:${fromId}:pending`, toId, (err, res) => {
       if (res === 0) {
         // we have an initial request
         this.redis.multi()
-          .sadd(`user:${fromId}:requested`, toId)
-          .sadd(`user:${toId}:pending`, fromId)
+          .sadd(`${this.namespace}:${fromId}:requested`, toId)
+          .sadd(`${this.namespace}:${toId}:pending`, fromId)
           .exec();
         return callback(true);
       }
       // we have a reciprocal request
       this.redis.multi()
-        .srem(`user:${fromId}:pending`, toId)
-        .srem(`user:${toId}:requested`, fromId)
-        .sadd(`user:${toId}:accepted`, fromId)
-        .sadd(`user:${fromId}:accepted`, toId)
+        .srem(`${this.namespace}:${fromId}:pending`, toId)
+        .srem(`${this.namespace}:${toId}:requested`, fromId)
+        .sadd(`${this.namespace}:${toId}:accepted`, fromId)
+        .sadd(`${this.namespace}:${fromId}:accepted`, toId)
         .exec();
       return callback(true);
     });
   }
 
   requested(userId, callback) {
-    this.redis.smembers(`user:${userId}:requested`, (err, res) => (callback(res)));
+    this.redis.smembers(`${this.namespace}:${userId}:requested`, (err, res) => (callback(res)));
   }
 
   pending(userId, callback) {
-    this.redis.smembers(`user:${userId}:pending`, (err, res) => (callback(res)));
+    this.redis.smembers(`${this.namespace}:${userId}:pending`, (err, res) => (callback(res)));
   }
 
   accepted(userId, callback) {
-    this.redis.smembers(`user:${userId}:accepted`, (err, res) => (callback(res)));
+    this.redis.smembers(`${this.namespace}:${userId}:accepted`, (err, res) => (callback(res)));
   }
 
 }
