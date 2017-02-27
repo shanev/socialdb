@@ -12,6 +12,9 @@ const STATE_KEY = {
  */
 class SocialGraph {
   constructor(redis = null, options = {}) {
+    if (redis == null) {
+      throw new Error('Initialized without a Redis client.');
+    }
     this.redis = redis;
     this.namespace = options.namespace || 'user';
   }
