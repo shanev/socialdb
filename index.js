@@ -9,6 +9,7 @@ const STATE_KEY = {
 
 /*
   Main class for user social graph with friend list and follower status.
+  Users must follow each other to be friends and in the `accepted` state.
  */
 class SocialGraph {
   constructor(redis = null, options = {}) {
@@ -53,6 +54,18 @@ class SocialGraph {
         .exec();
       return callback(true);
     });
+  }
+
+  /*
+    Mutually removes frendship between two users by removing each
+    other from their `accepted` lists.
+   */
+  unfollow(fromId, toId, callback) {
+    this.redis.multi()
+      .srem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
+      .srem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
+      .exec();
+    return callback(true);
   }
 
   /*

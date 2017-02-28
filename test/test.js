@@ -114,4 +114,19 @@ describe('requesting friends', () => {
       });
     });
   });
+
+  describe('.unfollow()', () => {
+    it('should mututally unfollow two users', (done) => {
+      sg.unfollow(1, 11, (success) => {
+        assert(success);
+        client.scard(`user:${1}:accepted`, (err, res) => {
+          assert.equal(res, 0);
+          client.scard(`user:${11}.accepted`, (err2, res2) => {
+            assert.equal(res2, 0);
+            done();
+          });
+        });
+      });
+    });
+  });
 });
