@@ -12,7 +12,7 @@ const SocialDB = require('../index.js');
 
 const sd = new SocialDB(client);
 
-describe('requesting friends', () => {
+describe('Testing SocialDB', () => {
   before(() => {
     client.flushdb();
   });
