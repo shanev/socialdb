@@ -6,17 +6,17 @@
   "author": "Shane Vitarana <shanev@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "debug": "^2.6.1",
-    "redis": "^2.6.5"
+    "debug": "2.6.1",
+    "redis": "2.6.5"
   },
   "scripts": {
     "redis": "redis-server /usr/local/etc/redis.conf",
     "test": "mocha"
   },
   "devDependencies": {
-    "eslint": "^3.16.1",
-    "eslint-config-airbnb-base": "^11.1.0",
-    "eslint-plugin-import": "^2.2.0",
-    "mocha": "^3.2.0"
+    "eslint": "3.16.1",
+    "eslint-config-airbnb-base": "11.1.0",
+    "eslint-plugin-import": "2.2.0",
+    "mocha": "3.2.0"
   }
 }
