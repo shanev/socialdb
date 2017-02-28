@@ -9,7 +9,6 @@
     "debug": "2.6.1",
   },
   "scripts": {
-    "redis": "redis-server /usr/local/etc/redis.conf",
     "test": "mocha"
   },
   "devDependencies": {

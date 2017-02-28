@@ -19,6 +19,8 @@ npm install socialdb --save
 
 ### Step 1: Initialize an instance of SocialDB with a Redis client
 
+[Install and run Redis server](https://redis.io/topics/quickstart). 
+
 Currently only supports the [redis](https://github.com/NodeRedis/node_redis) client. Follow installation instructions there if you don't have Redis installed.
 
 ```javascript
