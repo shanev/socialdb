@@ -2,9 +2,15 @@
   "name": "socialdb",
   "version": "0.5.0",
   "description": "Redis-backed social graph for Node.js",
+  "keywords": ["redis", "social", "friends", "friendship"],
   "main": "index.js",
   "author": "Shane Vitarana <shanev@gmail.com>",
   "license": "MIT",
+  "homepage": "https://github.com/shanev/socialdb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shanev/socialdb.git"
+  },
   "dependencies": {
     "debug": "2.6.1",
   },
