@@ -8,9 +8,9 @@ client.on('error', (err) => {
   console.log(err);
 });
 
-const SocialGraph = require('../index.js');
+const SocialDB = require('../index.js');
 
-const sg = new SocialGraph(client);
+const sd = new SocialDB(client);
 
 describe('requesting friends', () => {
   before(() => {
@@ -19,7 +19,7 @@ describe('requesting friends', () => {
 
   describe('.follow() initial request', () => {
     it('should add users to `requested` and `pending`', (done) => {
-      sg.follow(1, 11, (success) => {
+      sd.follow(1, 11, (success) => {
         assert(success);
         client.smembers(`user:${1}:requested`, (err, res) => {
           assert.equal(res[0], 11);
@@ -34,7 +34,7 @@ describe('requesting friends', () => {
     describe('should query `pending`, `requested`, and `accepted`', () => {
       describe('.requested()', () => {
         it('should get a list of requested followers', (done) => {
-          sg.requested(1, (users) => {
+          sd.requested(1, (users) => {
             assert.equal(users.length, 1);
             done();
           });
@@ -43,7 +43,7 @@ describe('requesting friends', () => {
 
       describe('.pending()', () => {
         it('should get a list of pending followers', (done) => {
-          sg.pending(11, (users) => {
+          sd.pending(11, (users) => {
             assert.equal(users.length, 1);
             done();
           });
@@ -52,7 +52,7 @@ describe('requesting friends', () => {
 
       describe('.accepted()', () => {
         it('should get a list of accepted followers', (done) => {
-          sg.accepted(1, (users) => {
+          sd.accepted(1, (users) => {
             assert.equal(users.length, 0);
             done();
           });
@@ -63,7 +63,7 @@ describe('requesting friends', () => {
 
   describe('.follow() reciprocal request', () => {
     it('should remove users from `requested` and `pending`', (done) => {
-      sg.follow(11, 1, (success) => {
+      sd.follow(11, 1, (success) => {
         assert(success);
         client.scard(`user:${1}:requested`, (err, res) => {
           assert.equal(res, 0);
@@ -88,7 +88,7 @@ describe('requesting friends', () => {
     describe('should query `pending`, `requested`, and `accepted`', () => {
       describe('.requested()', () => {
         it('should get a list of requested followers', (done) => {
-          sg.requested(1, (users) => {
+          sd.requested(1, (users) => {
             assert.equal(users.length, 0);
             done();
           });
@@ -97,7 +97,7 @@ describe('requesting friends', () => {
 
       describe('.pending()', () => {
         it('should get a list of pending followers', (done) => {
-          sg.pending(11, (users) => {
+          sd.pending(11, (users) => {
             assert.equal(users.length, 0);
             done();
           });
@@ -106,7 +106,7 @@ describe('requesting friends', () => {
 
       describe('.accepted()', () => {
         it('should get a list of accepted followers', (done) => {
-          sg.accepted(1, (users) => {
+          sd.accepted(1, (users) => {
             assert.equal(users.length, 1);
             done();
           });
@@ -117,7 +117,7 @@ describe('requesting friends', () => {
 
   describe('.unfollow()', () => {
     it('should mututally unfollow two users', (done) => {
-      sg.unfollow(1, 11, (success) => {
+      sd.unfollow(1, 11, (success) => {
         assert(success);
         client.scard(`user:${1}:accepted`, (err, res) => {
           assert.equal(res, 0);

@@ -11,7 +11,7 @@ const STATE_KEY = {
   Main class for user social graph with friend list and follower status.
   Users must follow each other to be friends and in the `accepted` state.
  */
-class SocialGraph {
+class SocialDB {
   constructor(redis = null, options = {}) {
     if (redis == null) {
       throw new Error('Initialized without a Redis client.');
@@ -90,4 +90,4 @@ class SocialGraph {
   }
 }
 
-module.exports = SocialGraph;
+module.exports = SocialDB;
