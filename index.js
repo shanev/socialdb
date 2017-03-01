@@ -40,17 +40,17 @@ class SocialDB {
       if (res === 0) {
         // we have an initial request
         this.redis.multi()
-          .sadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, toId)
-          .sadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, fromId)
+          .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, Date.now(), toId)
+          .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, Date.now(), fromId)
           .exec();
         return callback(true);
       }
       // we have a reciprocal request
       this.redis.multi()
-        .srem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
-        .srem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
-        .sadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
-        .sadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
+        .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
+        .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
+        .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, Date.now(), fromId)
+        .zadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, Date.now(), toId)
         .exec();
       return callback(true);
     });
@@ -62,8 +62,8 @@ class SocialDB {
    */
   unfollow(fromId, toId, callback) {
     this.redis.multi()
-      .srem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
-      .srem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
+      .zrem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
+      .zrem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
       .exec();
     return callback(true);
   }
