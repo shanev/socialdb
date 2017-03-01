@@ -36,8 +36,8 @@ class SocialDB {
    */
   follow(fromId, toId, callback) {
     // check if this is an initial or reciprocal request
-    this.redis.sismember(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, res) => {
-      if (res === 0) {
+    this.redis.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, score) => {
+      if (score === null) {
         // we have an initial request
         this.redis.multi()
           .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, Date.now(), toId)
@@ -72,21 +72,21 @@ class SocialDB {
     Returns a callback with a list of requested friends for a given `userId`
    */
   requested(userId, callback) {
-    this.redis.smembers(`${this.namespace}:${userId}:${STATE_KEY.requested}`, (err, res) => (callback(res)));
+    this.redis.zrevrange(`${this.namespace}:${userId}:${STATE_KEY.requested}`, 0, -1, (err, res) => (callback(res)));
   }
 
   /*
     Returns a callback with a list of pending friends for a given `userId`
    */
   pending(userId, callback) {
-    this.redis.smembers(`${this.namespace}:${userId}:${STATE_KEY.pending}`, (err, res) => (callback(res)));
+    this.redis.zrevrange(`${this.namespace}:${userId}:${STATE_KEY.pending}`, 0, -1, (err, res) => (callback(res)));
   }
 
   /*
     Returns a callback with a list of accepted friends for a given `userId`
    */
   accepted(userId, callback) {
-    this.redis.smembers(`${this.namespace}:${userId}:${STATE_KEY.accepted}`, (err, res) => (callback(res)));
+    this.redis.zrevrange(`${this.namespace}:${userId}:${STATE_KEY.accepted}`, 0, -1, (err, res) => (callback(res)));
   }
 }
 
