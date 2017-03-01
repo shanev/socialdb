@@ -34,25 +34,27 @@ class SocialDB {
    *     user:1:accepted 11
    *     user:11:accepted 1
    */
-  follow(fromId, toId, callback) {
-    // check if this is an initial or reciprocal request
-    this.redis.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, score) => {
-      if (score === null) {
-        // we have an initial request
+  follow(fromId, toId) {
+    return new Promise((resolve) => {
+      // check if this is an initial or reciprocal request
+      this.redis.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
+        // use date for sorted set ordering
+        const score = Date.now();
+        // handle initial request
+        if (result === null) {
+          this.redis.multi()
+            .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, score, toId)
+            .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, score, fromId)
+            .exec(resolve());
+        }
+        // handle reciprocal request
         this.redis.multi()
-          .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, Date.now(), toId)
-          .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, Date.now(), fromId)
-          .exec();
-        return callback(true);
-      }
-      // we have a reciprocal request
-      this.redis.multi()
-        .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
-        .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
-        .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, Date.now(), fromId)
-        .zadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, Date.now(), toId)
-        .exec();
-      return callback(true);
+          .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
+          .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
+          .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, score, fromId)
+          .zadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, score, toId)
+          .exec(resolve());
+      });
     });
   }
 
@@ -60,33 +62,49 @@ class SocialDB {
     Mutually removes frendship between two users by removing each
     other from their `accepted` lists.
    */
-  unfollow(fromId, toId, callback) {
-    this.redis.multi()
-      .zrem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
-      .zrem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
-      .exec();
-    return callback(true);
+  unfollow(fromId, toId) {
+    return new Promise((resolve) => {
+      this.redis.multi()
+        .zrem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
+        .zrem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
+        .exec(resolve());
+    });
   }
 
   /*
-    Returns a callback with a list of requested friends for a given `userId`
+    Returns a Promise with a list of requested friends for a given `userId`.
+    Sorted by date of creation (newest to oldest).
    */
-  requested(userId, callback) {
-    this.redis.zrevrange(`${this.namespace}:${userId}:${STATE_KEY.requested}`, 0, -1, (err, res) => (callback(res)));
+  requested(userId) {
+    return this.getList(userId, STATE_KEY.requested);
   }
 
   /*
-    Returns a callback with a list of pending friends for a given `userId`
+    Returns a Promise with a list of pending friends for a given `userId`.
+    Sorted by date of creation (newest to oldest).
    */
-  pending(userId, callback) {
-    this.redis.zrevrange(`${this.namespace}:${userId}:${STATE_KEY.pending}`, 0, -1, (err, res) => (callback(res)));
+  pending(userId) {
+    return this.getList(userId, STATE_KEY.pending);
   }
 
   /*
-    Returns a callback with a list of accepted friends for a given `userId`
+    Returns a Promise with a list of accepted friends for a given `userId`.
+    Sorted by date of creation (newest to oldest).
    */
-  accepted(userId, callback) {
-    this.redis.zrevrange(`${this.namespace}:${userId}:${STATE_KEY.accepted}`, 0, -1, (err, res) => (callback(res)));
+  accepted(userId) {
+    return this.getList(userId, STATE_KEY.accepted);
+  }
+
+  /*
+    Private method to get a redis sorted set for a given `userId` and state key.
+    Returns a Promise with the list.
+   */
+  getList(userId, state) {
+    return new Promise((resolve) => {
+      this.redis.zrevrange(`${this.namespace}:${userId}:${state}`, 0, -1, (err, res) => {
+        resolve(res);
+      });
+    });
   }
 }
 
