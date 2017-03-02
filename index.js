@@ -96,6 +96,13 @@ class SocialDB {
   }
 
   /*
+    Alias for `accepted(userId)`.
+   */
+  friends(userId) {
+    return this.accepted(userId);
+  }
+
+  /*
     Private method to get a redis sorted set for a given `userId` and state key.
     Returns a Promise with the list.
    */

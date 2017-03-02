@@ -132,4 +132,29 @@ describe('Testing SocialDB', () => {
       });
     });
   });
+
+  describe('.friends()', () => {
+    client.flushdb(() => {
+      it('should get a list of accepted followers', (done) => {
+        sd.friends(1).then((users) => {
+          assert.equal(users.length, 0);
+          done();
+        });
+      });
+    });
+
+    it('should get a list of accepted followers', (done) => {
+      sd.follow(1, 11).then(() => {
+        sd.follow(11, 1).then(() => {
+          sd.friends(11).then((users) => {
+            assert.equal(users.length, 1);
+            sd.friends(1).then((users2) => {
+              assert.equal(users2.length, 1);
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
 });
