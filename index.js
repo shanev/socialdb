@@ -1,5 +1,5 @@
-/*
-  String constants for Redis keys identifying user's follower states.
+/**
+ * String constants for Redis keys identifying user's follower states.
  */
 const STATE_KEY = {
   pending: 'pending',
@@ -7,11 +7,14 @@ const STATE_KEY = {
   accepted: 'accepted',
 };
 
-/*
-  Main class for user social graph with friend list and follower status.
-  Users must follow each other to be friends and in the `accepted` state.
+/**
+ * Main class for user social graph with friend list and follower status.
+ * Users must follow each other to be friends and in the `accepted` state.
  */
 class SocialDB {
+  /**
+   * Initializes a SocialDB object and throws and error if Redis is not passed in.
+   */
   constructor(redis = null, options = {}) {
     if (redis == null) {
       throw new Error('Initialized without a Redis client.');
@@ -21,7 +24,11 @@ class SocialDB {
   }
 
   /**
-   * Creates a relationship between fromId and toId
+   * follow() creates a relationship between `fromId` and `toId` and returns an empty Promise.
+   * For an initial request, `toId` is added to `fromId`s `requested` list, and `fromId` is added
+   * to `toId`s `pending` list. For a reciprocal request, `toId` is removed from `fromId`s
+   * `pending` list, and `fromId` is removed from `toId`s `requested` list. Then both user ids are
+   * added to each other's `accepted` lists, representing mutual friendship between both users.
    * i.e:
    *   user 1 wants to follow user 11:
    *     follow(1, 11)
@@ -40,6 +47,7 @@ class SocialDB {
       this.redis.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
         // use date for sorted set ordering
         const score = Date.now();
+
         // handle initial request
         if (result === null) {
           this.redis.multi()
@@ -47,6 +55,7 @@ class SocialDB {
             .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, score, fromId)
             .exec(resolve());
         }
+
         // handle reciprocal request
         this.redis.multi()
           .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
@@ -58,9 +67,9 @@ class SocialDB {
     });
   }
 
-  /*
-    Mutually removes frendship between two users by removing each
-    other from their `accepted` lists.
+  /**
+   * unfollow() mutually removes friendship between two users and returns an empty Promise.
+   * It removes each user from their `accepted` sets.
    */
   unfollow(fromId, toId) {
     return new Promise((resolve) => {
@@ -71,40 +80,39 @@ class SocialDB {
     });
   }
 
-  /*
-    Returns a Promise with a list of requested friends for a given `userId`.
-    Sorted by date of creation (newest to oldest).
+  /**
+   * requested() returns a Promise with a list of requested friends for a given `userId`.
+   * Sorted by date of creation (newest to oldest).
    */
   requested(userId) {
     return this.getList(userId, STATE_KEY.requested);
   }
 
-  /*
-    Returns a Promise with a list of pending friends for a given `userId`.
-    Sorted by date of creation (newest to oldest).
+  /**
+   * pending() returns a Promise with a list of pending friends for a given `userId`.
+   * Sorted by date of creation (newest to oldest).
    */
   pending(userId) {
     return this.getList(userId, STATE_KEY.pending);
   }
 
-  /*
-    Returns a Promise with a list of accepted friends for a given `userId`.
-    Sorted by date of creation (newest to oldest).
+  /**
+   * accepted() returns a Promise with a list of accepted friends for a given `userId`.
+   * Sorted by date of creation (newest to oldest).
    */
   accepted(userId) {
     return this.getList(userId, STATE_KEY.accepted);
   }
 
-  /*
-    Alias for `accepted(userId)`.
+  /**
+   * Alias for `accepted(userId)`.
    */
   friends(userId) {
     return this.accepted(userId);
   }
 
-  /*
-    Private method to get a redis sorted set for a given `userId` and state key.
-    Returns a Promise with the list.
+  /**
+   * getList() returns a Redis sorted set for a given `userId` and state key.
    */
   getList(userId, state) {
     return new Promise((resolve) => {
