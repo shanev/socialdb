@@ -134,8 +134,8 @@ describe('Testing SocialDB', () => {
   });
 
   describe('.friends()', () => {
-    client.flushdb(() => {
-      it('should get a list of accepted followers', (done) => {
+    it('should get a list of accepted followers', (done) => {
+      client.flushdb(() => {
         sd.friends(1).then((users) => {
           assert.equal(users.length, 0);
           done();
