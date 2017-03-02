@@ -30,7 +30,7 @@ npm install socialdb --save
 
 ### Step 1: Initialize an instance of SocialDB with a Redis client
 
-[Install and run Redis server](https://redis.io/topics/quickstart) if you are running this locally. 
+[Install and run Redis server](https://redis.io/topics/quickstart) if running locally. 
 
 Currently only supports the [redis](https://github.com/NodeRedis/node_redis) client. Follow installation instructions there for setting up the client.
 
@@ -45,41 +45,44 @@ const sd = new SocialDB(redis);
 ### Step 2: Profit
 
 ```javascript
-// user 1 requests to follow user 11
-sd.follow(1, 11).then(() => {
-	// get a list of user 1's requested friends
-	sd.requested(1).then((users) => {
-		console.log(users);
+// user 2 requests to follow user 3
+sd.follow(2, 3)
+	// get a list of user 2's requested friends
+	.then(() => sd.requested(2))
+	.then((users) => {
+		console.log(users); // ['3']
+	})
+	// get a list of user 3's friends with pending requests
+	.then(() => sd.pending(3))
+	.then((users) => {
+  		console.log(users); // ['2']
 	});
-	// ['11']
 
-	// get a list of user 11's pending requests
-	sd.pending(11).then((users) => {
-		console.log(users);
+// user 3 requests to follow user 2 back
+sd.follow(3, 2)
+	// get a list of user 2's friends
+	.then(() => sd.friends(2))
+	.then((users) => {
+  		console.log(users); // ['3']
+	})
+	// get a list of user 3's friends
+	.then(() => sd.friends(3))
+	.then((users) => {
+  		console.log(users); // ['2']
 	});
-	// ['1']	
-});
 
-// user 11 requets to follow user 1 back
-sd.follow(11, 1).then(() => {
-	// get a list of user 1's friends
-	sd.accepted(1).then((users) => {
-		console.log(users);
+// user 2 requests to unfollow user 3
+sd.unfollow(2, 3)
+	// get a list of user 2's friends
+	.then(() => sd.friends(2))
+	.then((users) => {
+  		console.log(users); // []
+	})
+	// get a list of user 3's friends
+	.then(() => sd.friends(3))
+	.then((users) => {
+  		console.log(users); // []
 	});
-	// ['11']
-
-	// get a list of user 11's friends
-	sd.accepted(11).then((users) => {
-		console.log(users);
-	});
-	// ['1']	
-});
-
-// user 1 requests to unfollow user 11
-// both are removed from each other's `accepted` list
-sd.unfollow(1, 11).then(() => {
-	// see ya, don't wanna be ya user 11!
-});
 ```
 
 ## Error Handling
@@ -93,6 +96,14 @@ client.on('error', (err) => {
   // handle the error
   console.log(err);
 });
+```
+
+## Debugging
+
+Add `DEBUG=socialdb` to your node start script to see debug output. i.e:
+
+```sh
+DEBUG=socialdb node server.js
 ```
 
 ## Tests

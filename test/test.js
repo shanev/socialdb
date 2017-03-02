@@ -26,7 +26,10 @@ describe('Testing SocialDB', () => {
             assert.equal(count, 1);
             client.zcard(`user:${11}:pending`, (err2, count2) => {
               assert.equal(count2, 1);
-              done();
+              client.zcard(`user:${11}:accepted`, (err3, count3) => {
+                assert.equal(count3, 0);
+                done();
+              });
             });
           });
         });
@@ -143,18 +146,69 @@ describe('Testing SocialDB', () => {
       });
     });
 
-    it('should get a list of accepted followers', (done) => {
-      sd.follow(1, 11).then(() => {
-        sd.follow(11, 1).then(() => {
-          sd.friends(11).then((users) => {
-            assert.equal(users.length, 1);
-            sd.friends(1).then((users2) => {
-              assert.equal(users2.length, 1);
-              done();
-            });
-          });
+    it('should get a list of accepted followers using Promise chaining', (done) => {
+      sd.follow(1, 11)
+        .then(() => sd.follow(11, 1))
+        .then(() => sd.unfollow(11, 1))
+        .then(() => sd.friends(1))
+        .then((users) => {
+          assert.equal(users.length, 0);
+          done();
         });
-      });
+    });
+  });
+
+  describe('README code examples', () => {
+    it('user 2 should request to follow user 3', (done) => {
+      // user 2 requests to follow user 3
+      sd.follow(2, 3)
+        // get a list of user 2's requested friends
+        .then(() => sd.requested(2))
+        .then((users) => {
+          assert.equal(users[0], 3);
+        })
+        // get a list of user 3's friends with pending requests
+        .then(() => sd.pending(3))
+        .then((users) => {
+          assert.equal(users[0], 2);
+          done();
+        });
+    });
+
+    it('user 3 should request to follow user 2 back', (done) => {
+      // user 3 requests to follow user 2 back
+      sd.follow(3, 2)
+        // get a list of user 2's friends
+        .then(() => sd.friends(2))
+        .then((users) => {
+          console.log(users); // ['3']
+          assert.equal(users[0], 3);
+        })
+        // get a list of user 3's friends
+        .then(() => sd.friends(3))
+        .then((users) => {
+          console.log(users); // ['2']
+          assert.equal(users[0], 2);
+          done();
+        });
+    });
+
+    it('user 2 should unfollow user 3', (done) => {
+      // user 2 requests to unfollow user 3
+      sd.unfollow(2, 3)
+        // get a list of user 2's friends
+        .then(() => sd.friends(2))
+        .then((users) => {
+          console.log(users); // []
+          assert.equal(users[0], null);
+        })
+        // get a list of user 3's friends
+        .then(() => sd.friends(3))
+        .then((users) => {
+          console.log(users); // []
+          assert.equal(users[0], null);
+          done();
+        });
     });
   });
 });

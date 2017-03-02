@@ -1,3 +1,6 @@
+// Start node with DEBUG=socialdb to see debug output
+const debug = require('debug')('socialdb');
+
 /**
  * String constants for Redis keys identifying user's follower states.
  */
@@ -48,21 +51,27 @@ class SocialDB {
         // use date for sorted set ordering
         const score = Date.now();
 
-        // handle initial request
         if (result === null) {
+          // handle initial request
           this.redis.multi()
             .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, score, toId)
             .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, score, fromId)
-            .exec(resolve());
+            .exec(() => {
+              debug(`${fromId} requested to be friends with ${toId}`);
+              return resolve();
+            });
+        } else {
+          // handle reciprocal request
+          this.redis.multi()
+            .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
+            .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
+            .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, score, fromId)
+            .zadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, score, toId)
+            .exec(() => {
+              debug(`${fromId} and ${toId} are now friends`);
+              return resolve();
+            });
         }
-
-        // handle reciprocal request
-        this.redis.multi()
-          .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
-          .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
-          .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, score, fromId)
-          .zadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, score, toId)
-          .exec(resolve());
       });
     });
   }
@@ -76,7 +85,10 @@ class SocialDB {
       this.redis.multi()
         .zrem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
         .zrem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
-        .exec(resolve());
+        .exec(() => {
+          debug(`Removed friendship between ${fromId} and ${toId}`);
+          return resolve();
+        });
     });
   }
 
@@ -116,9 +128,9 @@ class SocialDB {
    */
   getList(userId, state) {
     return new Promise((resolve) => {
-      this.redis.zrevrange(`${this.namespace}:${userId}:${state}`, 0, -1, (err, res) => {
-        resolve(res);
-      });
+      const key = `${this.namespace}:${userId}:${state}`;
+      debug(`Returning list for: ${key}`);
+      this.redis.zrevrange(key, 0, -1, (err, res) => resolve(res));
     });
   }
 }

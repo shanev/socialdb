@@ -15,7 +15,7 @@
     "debug": "^2.6.1"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "DEBUG=socialdb mocha"
   },
   "devDependencies": {
     "redis": "^2.6.5",
