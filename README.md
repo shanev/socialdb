@@ -85,6 +85,16 @@ sd.unfollow(2, 3)
 	});
 ```
 
+SocialDB also works with async/await available in Node 7.6+. Witness:
+
+```javascript
+await sd.follow(2,3);
+var users = await sd.requested(2);
+console.log(users); // ['3']
+users = await sd.pending(3);
+console.log(users); // ['2']
+```
+
 ## Error Handling
 
 Currently SocialDB only throws an error on initialization if you don't supply a Redis client.
