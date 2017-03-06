@@ -1,5 +1,7 @@
 # SocialDB 
 
+[![Build Status](https://travis-ci.org/shanev/socialdb.svg?branch=master)](https://travis-ci.org/shanev/socialdb)
+
 SocialDB is a Redis-backed social graph for Node.js. It uses a friend model similar to Facebook where two users have to follow each other to be friends. 
 
 All operations run as asynchronous atomic transactions, so the database is never left in an invalid state. All methods return native Promises. Redis is the ideal storage mechanism for friend relationships, since they can be stored as sets. With sets you can do interesting things with set intersection to find mutual friends, recommended friends, etc. SocialDB stores friend relationships as sorted sets ordered by date.
