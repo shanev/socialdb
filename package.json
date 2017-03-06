@@ -2,7 +2,12 @@
   "name": "socialdb",
   "version": "0.1.1",
   "description": "Redis-backed social graph for Node.js",
-  "keywords": ["redis", "social", "friends", "friendship"],
+  "keywords": [
+    "redis",
+    "social",
+    "friends",
+    "friendship"
+  ],
   "main": "index.js",
   "author": "Shane Vitarana <shanev@gmail.com>",
   "license": "MIT",
@@ -15,13 +20,15 @@
     "debug": "^2.6.1"
   },
   "scripts": {
-    "test": "DEBUG=socialdb mocha"
+    "test": "istanbul cover node_modules/mocha/bin/_mocha && codecov"
   },
   "devDependencies": {
-    "redis": "^2.6.5",
+    "codecov": "^1.0.1",
     "eslint": "^3.16.1",
     "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0",
-    "mocha": "^3.2.0"
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "redis": "^2.6.5"
   }
 }
