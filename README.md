@@ -133,6 +133,6 @@ npm test
 
 Thanks [@mattinsler](https://github.com/mattinsler) for initial code review.
 
-## License
+## Author
 
-MIT
+Shane Vitarana :: [http://shanev.me](http://shanev.me) :: [@shanev](https://twitter.com/shanev)
