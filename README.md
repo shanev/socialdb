@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/socialdb.svg)](https://badge.fury.io/js/socialdb)
 [![Build Status](https://travis-ci.org/shanev/socialdb.svg?branch=master)](https://travis-ci.org/shanev/socialdb)
+[![codecov](https://codecov.io/gh/shanev/socialdb/branch/master/graph/badge.svg)](https://codecov.io/gh/shanev/socialdb)
 [![Dependencies](https://david-dm.org/shanev/socialdb.svg)](https://david-dm.org/shanev/socialdb)
 
 SocialDB is a Redis-backed social graph for Node.js. It uses a friend model similar to Facebook where two users have to follow each other to be friends. 
