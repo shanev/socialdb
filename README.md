@@ -63,23 +63,17 @@ Note: This example uses async/await, only available in Node 7.6+.
 ```javascript
 // user 2 requests to follow user 3
 await sd.follow(2, 3)
-// get a list of user 2's requested friends
 console.log(await sd.requested(2)); // ['3']
-// get a list of user 3's pending requests
 console.log(await sd.pending(3)); // ['2']
 
 // user 3 requests to follow user 2 back
 await sd.follow(3, 2);
-// get a list of user 2's friends
 console.log(await sd.friends(2)); // ['3']
-// get a list of user 3's friends
 console.log(await sd.friends(3)); // ['2']
 
 // user 2 requests to unfollow user 3
 await sd.unfollow(2, 3);
-// get a list of user 2's friends
 console.log(await sd.friends(2)); // []
-// get a list of user 3's friends
 console.log(await sd.friends(3)); // []
 ```
 
