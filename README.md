@@ -49,55 +49,29 @@ const sd = new SocialDB(redis);
 
 ### Step 2: Profit
 
+Note: This example uses async/await, only available in Node 7.6+.
+
 ```javascript
 // user 2 requests to follow user 3
-sd.follow(2, 3)
-	// get a list of user 2's requested friends
-	.then(() => sd.requested(2))
-	.then((users) => {
-		console.log(users); // ['3']
-	})
-	// get a list of user 3's friends with pending requests
-	.then(() => sd.pending(3))
-	.then((users) => {
-  		console.log(users); // ['2']
-	});
+await sd.follow(2, 3)
+// get a list of user 2's requested friends
+console.log(await sd.requested(2)); // ['3']
+// get a list of user 3's pending requests
+console.log(await sd.pending(3)); // ['2']
 
 // user 3 requests to follow user 2 back
-sd.follow(3, 2)
-	// get a list of user 2's friends
-	.then(() => sd.friends(2))
-	.then((users) => {
-  		console.log(users); // ['3']
-	})
-	// get a list of user 3's friends
-	.then(() => sd.friends(3))
-	.then((users) => {
-  		console.log(users); // ['2']
-	});
+await sd.follow(3, 2);
+// get a list of user 2's friends
+console.log(await sd.friends(2)); // ['3']
+// get a list of user 3's friends
+console.log(await sd.friends(3)); // ['2']
 
 // user 2 requests to unfollow user 3
-sd.unfollow(2, 3)
-	// get a list of user 2's friends
-	.then(() => sd.friends(2))
-	.then((users) => {
-  		console.log(users); // []
-	})
-	// get a list of user 3's friends
-	.then(() => sd.friends(3))
-	.then((users) => {
-  		console.log(users); // []
-	});
-```
-
-SocialDB also works with async/await available in Node 7.6+. Witness:
-
-```javascript
-await sd.follow(2,3);
-var users = await sd.requested(2);
-console.log(users); // ['3']
-users = await sd.pending(3);
-console.log(users); // ['2']
+await sd.unfollow(2, 3);
+// get a list of user 2's friends
+console.log(await sd.friends(2)); // []
+// get a list of user 3's friends
+console.log(await sd.friends(3)); // []
 ```
 
 ## Error Handling
