@@ -1,6 +1,8 @@
 // Start node with DEBUG=socialdb to see debug output
 const debug = require('debug')('socialdb');
 
+const redis = require('redis');
+
 /**
  * String constants for Redis keys identifying user's follower states.
  */
@@ -16,14 +18,12 @@ const STATE_KEY = {
  */
 class SocialDB {
   /**
-   * Initializes a SocialDB object and throws and error if Redis is not passed in.
+   * Initializes a new SocialDB object.
+   * Optionally takes in a Redis config (https://github.com/NodeRedis/node_redis#rediscreateclient).
    */
-  constructor(redis = null, options = {}) {
-    if (redis == null) {
-      throw new Error('Initialized without a Redis client.');
-    }
-    this.redis = redis;
-    this.namespace = options.namespace || 'user';
+  constructor(config = null, namespace = 'user') {
+    this.client = (config != null) ? redis.createClient(config) : redis.createClient();
+    this.namespace = namespace;
   }
 
   /**
@@ -47,13 +47,13 @@ class SocialDB {
   follow(fromId, toId) {
     return new Promise((resolve) => {
       // check if this is an initial or reciprocal request
-      this.redis.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
+      this.client.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
         // use date for sorted set ordering
         const score = Date.now();
 
         if (result === null) {
           // handle initial request
-          this.redis.multi()
+          this.client.multi()
             .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, score, toId)
             .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, score, fromId)
             .exec(() => {
@@ -62,7 +62,7 @@ class SocialDB {
             });
         } else {
           // handle reciprocal request
-          this.redis.multi()
+          this.client.multi()
             .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
             .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
             .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, score, fromId)
@@ -82,7 +82,7 @@ class SocialDB {
    */
   unfollow(fromId, toId) {
     return new Promise((resolve) => {
-      this.redis.multi()
+      this.client.multi()
         .zrem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
         .zrem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
         .exec(() => {
@@ -130,7 +130,7 @@ class SocialDB {
     return new Promise((resolve) => {
       const key = `${this.namespace}:${userId}:${state}`;
       debug(`Returning list for: ${key}`);
-      this.redis.zrevrange(key, 0, -1, (err, res) => resolve(res));
+      this.client.zrevrange(key, 0, -1, (err, res) => resolve(res));
     });
   }
 }

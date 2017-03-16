@@ -4,14 +4,13 @@ const redis = require('redis');
 
 const client = redis.createClient();
 
-// this is how redis errors are handled
 client.on('error', (err) => {
   console.log(err);
 });
 
 const SocialDB = require('../index.js');
 
-const sd = new SocialDB(client);
+const sd = new SocialDB();
 
 describe('Testing SocialDB', () => {
   before(() => {
