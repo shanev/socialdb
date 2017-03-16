@@ -23,6 +23,12 @@ or npm:
 npm install socialdb --save
 ```
 
+Run Redis server if running locally:
+```sh
+redis-server
+```
+Check out [Redis quickstart](https://redis.io/topics/quickstart) to install.
+
 ## API
 * follow(fromId, toId)
 * unfollow(fromId, toId)
@@ -33,18 +39,21 @@ npm install socialdb --save
 
 ## Usage
 
-### Step 1: Initialize an instance of SocialDB with a Redis client
+### Step 1: Initialize an instance of SocialDB
 
-[Install and run Redis server](https://redis.io/topics/quickstart) if running locally. 
-
-Currently only supports the [redis](https://github.com/NodeRedis/node_redis) client. Follow installation instructions there for setting up the client.
-
-```javascript
-const redis = require('redis').createClient();
-
+Require SocialDB:
+```js
 const SocialDB = require('socialdb');
+```
 
-const sd = new SocialDB(redis);
+Initialize SocialDB, connecting to a local Redis server running on the default port:
+```js
+const sd = new SocialDB();
+```
+
+Optionally pass in a [Redis configuration](https://github.com/NodeRedis/node_redis#rediscreateclient) to connect to a remote server.
+```js
+const sd = new SocialDB(REDIS_CLOUD_URL);
 ```
 
 ### Step 2: Profit
