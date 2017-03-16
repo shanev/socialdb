@@ -46,9 +46,10 @@ class SocialDB {
    *     user:11:accepted 1
    */
   follow(fromId, toId) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       // check if this is an initial or reciprocal request
       this.client.zscore(`${this.namespace}:user:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
+        if (err) { reject(err); }
         // use date for sorted set ordering
         const score = Date.now();
 
@@ -84,7 +85,7 @@ class SocialDB {
    * It removes each user from their `accepted` sets.
    */
   unfollow(fromId, toId) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.client.multi()
         .zrem(`${this.namespace}:user:${fromId}:${STATE_KEY.accepted}`, toId)
         .zrem(`${this.namespace}:user:${toId}:${STATE_KEY.accepted}`, fromId)
@@ -131,7 +132,7 @@ class SocialDB {
    * getList() returns a Redis sorted set for a given `userId` and state key.
    */
   getList(userId, state) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const key = `${this.namespace}:user:${userId}:${state}`;
       debug(`Returning list for: ${key}`);
       this.client.zrevrange(key, 0, -1, (err, res) => {
