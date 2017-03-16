@@ -20,8 +20,9 @@ class SocialDB {
   /**
    * Initializes a new SocialDB object.
    * Optionally takes in a Redis config (https://github.com/NodeRedis/node_redis#rediscreateclient).
+   * Optionally takes in a namespace.
    */
-  constructor(config = null, namespace = 'user') {
+  constructor(config = null, namespace = 'socialdb') {
     this.client = (config != null) ? redis.createClient(config) : redis.createClient();
     this.namespace = namespace;
   }
@@ -47,27 +48,29 @@ class SocialDB {
   follow(fromId, toId) {
     return new Promise((resolve) => {
       // check if this is an initial or reciprocal request
-      this.client.zscore(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
+      this.client.zscore(`${this.namespace}:user:${fromId}:${STATE_KEY.pending}`, toId, (err, result) => {
         // use date for sorted set ordering
         const score = Date.now();
 
         if (result === null) {
           // handle initial request
           this.client.multi()
-            .zadd(`${this.namespace}:${fromId}:${STATE_KEY.requested}`, score, toId)
-            .zadd(`${this.namespace}:${toId}:${STATE_KEY.pending}`, score, fromId)
-            .exec(() => {
+            .zadd(`${this.namespace}:user:${fromId}:${STATE_KEY.requested}`, score, toId)
+            .zadd(`${this.namespace}:user:${toId}:${STATE_KEY.pending}`, score, fromId)
+            .exec((err) => {
+              if (err) { reject(err); }
               debug(`${fromId} requested to be friends with ${toId}`);
               return resolve();
             });
         } else {
           // handle reciprocal request
           this.client.multi()
-            .zrem(`${this.namespace}:${fromId}:${STATE_KEY.pending}`, toId)
-            .zrem(`${this.namespace}:${toId}:${STATE_KEY.requested}`, fromId)
-            .zadd(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, score, fromId)
-            .zadd(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, score, toId)
-            .exec(() => {
+            .zrem(`${this.namespace}:user:${fromId}:${STATE_KEY.pending}`, toId)
+            .zrem(`${this.namespace}:user:${toId}:${STATE_KEY.requested}`, fromId)
+            .zadd(`${this.namespace}:user:${toId}:${STATE_KEY.accepted}`, score, fromId)
+            .zadd(`${this.namespace}:user:${fromId}:${STATE_KEY.accepted}`, score, toId)
+            .exec((err) => {
+              if (err) { reject(err); }
               debug(`${fromId} and ${toId} are now friends`);
               return resolve();
             });
@@ -83,9 +86,10 @@ class SocialDB {
   unfollow(fromId, toId) {
     return new Promise((resolve) => {
       this.client.multi()
-        .zrem(`${this.namespace}:${fromId}:${STATE_KEY.accepted}`, toId)
-        .zrem(`${this.namespace}:${toId}:${STATE_KEY.accepted}`, fromId)
-        .exec(() => {
+        .zrem(`${this.namespace}:user:${fromId}:${STATE_KEY.accepted}`, toId)
+        .zrem(`${this.namespace}:user:${toId}:${STATE_KEY.accepted}`, fromId)
+        .exec((err) => {
+          if (err) { reject(err); }
           debug(`Removed friendship between ${fromId} and ${toId}`);
           return resolve();
         });
@@ -128,9 +132,12 @@ class SocialDB {
    */
   getList(userId, state) {
     return new Promise((resolve) => {
-      const key = `${this.namespace}:${userId}:${state}`;
+      const key = `${this.namespace}:user:${userId}:${state}`;
       debug(`Returning list for: ${key}`);
-      this.client.zrevrange(key, 0, -1, (err, res) => resolve(res));
+      this.client.zrevrange(key, 0, -1, (err, res) => {
+        if (err) { reject(err); }
+        resolve(res)
+      });
     });
   }
 }

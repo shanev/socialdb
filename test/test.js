@@ -10,9 +10,9 @@ client.on('error', (err) => {
 
 const SocialDB = require('../index.js');
 
-const sd = new SocialDB();
-
 describe('Testing SocialDB', () => {
+  const sd = new SocialDB();
+
   before(() => {
     client.flushdb();
   });
@@ -21,11 +21,11 @@ describe('Testing SocialDB', () => {
     describe('initial request', () => {
       it('should add users to `requested` and `pending`', (done) => {
         sd.follow(1, 11).then(() => {
-          client.zcard(`user:${1}:requested`, (err, count) => {
+          client.zcard(`socialdb:user:${1}:requested`, (err, count) => {
             assert.equal(count, 1);
-            client.zcard(`user:${11}:pending`, (err2, count2) => {
+            client.zcard(`socialdb:user:${11}:pending`, (err2, count2) => {
               assert.equal(count2, 1);
-              client.zcard(`user:${11}:accepted`, (err3, count3) => {
+              client.zcard(`socialdb:user:${11}:accepted`, (err3, count3) => {
                 assert.equal(count3, 0);
                 done();
               });
@@ -38,9 +38,9 @@ describe('Testing SocialDB', () => {
     describe('reciprocal request', () => {
       it('should remove users from `requested` and `pending`', (done) => {
         sd.follow(11, 1).then(() => {
-          client.zcard(`user:${1}:requested`, (err, count) => {
+          client.zcard(`socialdb:user:${1}:requested`, (err, count) => {
             assert.equal(count, 0);
-            client.zcard(`user:${11}:pending`, (err2, count2) => {
+            client.zcard(`socialdb:user:${11}:pending`, (err2, count2) => {
               assert.equal(count2, 0);
               done();
             });
@@ -49,9 +49,9 @@ describe('Testing SocialDB', () => {
       });
 
       it('should add users to `accepted`', (done) => {
-        client.zcard(`user:${1}:accepted`, (err, count) => {
+        client.zcard(`socialdb:user:${1}:accepted`, (err, count) => {
           assert.equal(count, 1);
-          client.zcard(`user:${11}:accepted`, (err2, count2) => {
+          client.zcard(`socialdb:user:${11}:accepted`, (err2, count2) => {
             assert.equal(count2, 1);
             done();
           });
@@ -63,9 +63,9 @@ describe('Testing SocialDB', () => {
   describe('.unfollow()', () => {
     it('should mututally unfollow two users', (done) => {
       sd.unfollow(1, 11).then(() => {
-        client.zcard(`user:${1}:accepted`, (err, count) => {
+        client.zcard(`socialdb:user:${1}:accepted`, (err, count) => {
           assert.equal(count, 0);
-          client.zcard(`user:${11}.accepted`, (err2, count2) => {
+          client.zcard(`socialdb:user:${11}.accepted`, (err2, count2) => {
             assert.equal(count2, 0);
             done();
           });
