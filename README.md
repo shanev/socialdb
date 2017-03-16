@@ -83,19 +83,6 @@ console.log(await sd.friends(2)); // []
 console.log(await sd.friends(3)); // []
 ```
 
-## Error Handling
-
-Currently SocialDB only throws an error on initialization if you don't supply a Redis client.
-All other errors shoud be handled using the Redis error handler, since SocialDB is basically a
-wrapper around Redis commands.
-
-```javascript
-client.on('error', (err) => {
-  // handle the error
-  console.log(err);
-});
-```
-
 ## Debugging
 
 Add `DEBUG=socialdb` to your node start script to see debug output. i.e:
