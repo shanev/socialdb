@@ -7,9 +7,10 @@ const redis = require('redis');
  * String constants for Redis keys identifying user's follower states.
  */
 const STATE_KEY = {
+  accepted: 'accepted',
+  invited: 'invited',
   pending: 'pending',
   requested: 'requested',
-  accepted: 'accepted',
 };
 
 /**
@@ -58,8 +59,8 @@ class SocialDB {
           this.client.multi()
             .zadd(`${this.namespace}:user:${fromId}:${STATE_KEY.requested}`, score, toId)
             .zadd(`${this.namespace}:user:${toId}:${STATE_KEY.pending}`, score, fromId)
-            .exec((err) => {
-              if (err) { reject(err); }
+            .exec((error) => {
+              if (error) { reject(error); }
               debug(`${fromId} requested to be friends with ${toId}`);
               return resolve();
             });
@@ -70,8 +71,8 @@ class SocialDB {
             .zrem(`${this.namespace}:user:${toId}:${STATE_KEY.requested}`, fromId)
             .zadd(`${this.namespace}:user:${toId}:${STATE_KEY.accepted}`, score, fromId)
             .zadd(`${this.namespace}:user:${fromId}:${STATE_KEY.accepted}`, score, toId)
-            .exec((err) => {
-              if (err) { reject(err); }
+            .exec((error) => {
+              if (error) { reject(error); }
               debug(`${fromId} and ${toId} are now friends`);
               return resolve();
             });
@@ -137,7 +138,7 @@ class SocialDB {
       debug(`Returning list for: ${key}`);
       this.client.zrevrange(key, 0, -1, (err, res) => {
         if (err) { reject(err); }
-        resolve(res)
+        resolve(res);
       });
     });
   }
