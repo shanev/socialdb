@@ -74,6 +74,35 @@ describe('Testing SocialDB', () => {
     });
   });
 
+  describe('.invite()', () => {
+    it('should invite a user', (done) => {
+      sd.invite(1234, 'some_id').then(() => {
+        client.zcard('socialdb:user:some_id:invited', (err, count) => {
+          assert.equal(count, 1);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('.invited()', () => {
+    it('should get a list of invited users', (done) => {
+      sd.invited('+14153337777').then((users) => {
+        assert.equal(users.length, 0);
+        done();
+      });
+    });
+
+    it('should get a list of invited users', (done) => {
+      sd.invite(11, '+14153337777').then(() => {
+        sd.invited('+14153337777').then((users) => {
+          assert.equal(users.length, 1);
+          done();
+        });
+      });
+    });
+  });
+
   describe('.requested()', () => {
     it('should get a list of requested followers', (done) => {
       sd.requested(1).then((users) => {

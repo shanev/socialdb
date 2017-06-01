@@ -1,6 +1,5 @@
 // Start node with DEBUG=socialdb to see debug output
 const debug = require('debug')('socialdb');
-
 const redis = require('redis');
 
 /**
@@ -99,11 +98,38 @@ class SocialDB {
   }
 
   /**
+   * invte() adds a user to the `invited` set.
+   * `invitedId` can be any form of identifier, like user id or phone number.
+   * `userId` is the user id of the user who doing the inviting
+   */
+  invite(userId, invitedId) {
+    // use date for sorted set ordering
+    return new Promise((resolve, reject) => {
+      this.client.zadd(
+        `${this.namespace}:user:${invitedId}:${STATE_KEY.invited}`,
+        Date.now(),
+        userId,
+        (err, res) => {
+          if (err) { reject(err); }
+          return resolve(res);
+        });
+    });
+  }
+
+  /**
    * requested() returns a Promise with a list of requested friends for a given `userId`.
    * Sorted by date of creation (newest to oldest).
    */
   requested(userId) {
     return this.getList(userId, STATE_KEY.requested);
+  }
+
+  /**
+   * requested() returns a Promise with a list of requested friends for a given `id`.
+   * Sorted by date of creation (newest to oldest).
+   */
+  invited(id) {
+    return this.getList(id, STATE_KEY.invited);
   }
 
   /**
