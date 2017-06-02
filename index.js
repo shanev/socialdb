@@ -118,6 +118,22 @@ class SocialDB {
   }
 
   /**
+   * deleteInvites() removes all invites for an invited id.
+   * `invitedId` can be any form of identifier, like user id or phone number.
+   */
+  deleteInvites(invitedId) {
+    return new Promise((resolve, reject) => {
+      this.client.del(
+        `${this.namespace}:user:${invitedId}:${STATE_KEY.invited}`,
+        (err, res) => {
+          if (err) { reject(err); }
+          debug(`Deleted all invites for ${invitedId}`);
+          return resolve(res);
+        });
+    });
+  }
+
+  /**
    * requested() returns a Promise with a list of requested friends for a given `userId`.
    * Sorted by date of creation (newest to oldest).
    */

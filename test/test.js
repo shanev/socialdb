@@ -85,6 +85,17 @@ describe('Testing SocialDB', () => {
     });
   });
 
+  describe('.deleteInvites()', () => {
+    it('should delete all invites', (done) => {
+      sd.deleteInvites('some_id').then(() => {
+        client.zcard('socialdb:user:some_id:invited', (err, count) => {
+          assert.equal(count, 0);
+          done();
+        });
+      });
+    });
+  });
+
   describe('.invited()', () => {
     it('should get a list of 0 invited users', (done) => {
       sd.invited('+14153337777').then((users) => {
