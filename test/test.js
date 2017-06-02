@@ -86,17 +86,26 @@ describe('Testing SocialDB', () => {
   });
 
   describe('.invited()', () => {
-    it('should get a list of invited users', (done) => {
+    it('should get a list of 0 invited users', (done) => {
       sd.invited('+14153337777').then((users) => {
         assert.equal(users.length, 0);
         done();
       });
     });
 
-    it('should get a list of invited users', (done) => {
+    it('should get a list of 1 invited users', (done) => {
       sd.invite(11, '+14153337777').then(() => {
         sd.invited('+14153337777').then((users) => {
           assert.equal(users.length, 1);
+          done();
+        });
+      });
+    });
+
+    it('should get a list of 2 invited users', (done) => {
+      sd.invite(111, '+14153337777').then(() => {
+        sd.invited('+14153337777').then((users) => {
+          assert.equal(users.length, 2);
           done();
         });
       });
