@@ -32,6 +32,7 @@ Check out [Redis quickstart](https://redis.io/topics/quickstart) to install.
 ## API
 * follow(fromId, toId)
 * unfollow(fromId, toId)
+* invite(userId, someId)
 * requested(userId)
 * pending(userId)
 * accepted(userId)
@@ -63,18 +64,29 @@ Note: This example uses async/await, only available in Node 7.6+.
 ```javascript
 // user 2 requests to follow user 3
 await sd.follow(2, 3)
-console.log(await sd.requested(2)); // ['3']
-console.log(await sd.pending(3)); // ['2']
+console.log(await sd.requested(2)); 
+// ['3']
+console.log(await sd.pending(3)); 
+// ['2']
 
 // user 3 requests to follow user 2 back
 await sd.follow(3, 2);
-console.log(await sd.friends(2)); // ['3']
-console.log(await sd.friends(3)); // ['2']
+console.log(await sd.friends(2)); 
+// ['3']
+console.log(await sd.friends(3)); 
+// ['2']
 
 // user 2 requests to unfollow user 3
 await sd.unfollow(2, 3);
-console.log(await sd.friends(2)); // []
-console.log(await sd.friends(3)); // []
+console.log(await sd.friends(2)); 
+// []
+console.log(await sd.friends(3)); 
+// []
+
+// user 2 invites user with phone number +14153337777
+await sd.invite(2, '+14153337777')
+console.log(await sd.invited('+14153337777')); 
+// [2]
 ```
 
 ## Debugging
