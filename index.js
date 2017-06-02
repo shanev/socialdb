@@ -111,6 +111,7 @@ class SocialDB {
         userId,
         (err, res) => {
           if (err) { reject(err); }
+          debug(`${userId} invited ${invitedId}`);
           return resolve(res);
         });
     });
