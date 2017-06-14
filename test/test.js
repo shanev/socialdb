@@ -1,5 +1,4 @@
 const assert = require('assert');
-
 const redis = require('redis');
 
 const client = redis.createClient();
@@ -11,7 +10,7 @@ client.on('error', (err) => {
 const SocialDB = require('../index.js');
 
 describe('Testing SocialDB', () => {
-  const sd = new SocialDB();
+  const sd = new SocialDB(client);
 
   before(() => {
     client.flushdb();

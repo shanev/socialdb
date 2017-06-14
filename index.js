@@ -1,6 +1,5 @@
 // Start node with DEBUG=socialdb to see debug output
 const debug = require('debug')('socialdb');
-const redis = require('redis');
 
 /**
  * String constants for Redis keys identifying user's follower states.
@@ -19,11 +18,11 @@ const STATE_KEY = {
 class SocialDB {
   /**
    * Initializes a new SocialDB object.
-   * Optionally takes in a Redis config (https://github.com/NodeRedis/node_redis#rediscreateclient).
+   * Takes in a Redis client (https://github.com/NodeRedis/node_redis).
    * Optionally takes in a namespace.
    */
-  constructor(config = null, namespace = 'socialdb') {
-    this.client = (config != null) ? redis.createClient(config) : redis.createClient();
+  constructor(redis, namespace = 'socialdb') {
+    this.client = redis;
     this.namespace = namespace;
   }
 

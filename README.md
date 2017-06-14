@@ -47,14 +47,9 @@ Require SocialDB:
 const SocialDB = require('socialdb');
 ```
 
-Initialize SocialDB, connecting to a local Redis server running on the default port:
+Initialize SocialDB, connecting to a [Redis client](https://github.com/NodeRedis/node_redis):
 ```js
-const sd = new SocialDB();
-```
-
-Optionally pass in a [Redis configuration](https://github.com/NodeRedis/node_redis#rediscreateclient) to connect to a remote server.
-```js
-const sd = new SocialDB(REDIS_CLOUD_URL);
+const sd = new SocialDB(redisClient);
 ```
 
 ### Step 2: Profit
@@ -104,10 +99,6 @@ yarn install
 # npm install works too
 npm test
 ```
-
-## Acknowledgements
-
-Thanks [@mattinsler](https://github.com/mattinsler) for initial code review.
 
 ## Author
 
