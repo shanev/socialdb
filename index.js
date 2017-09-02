@@ -6,6 +6,7 @@ const debug = require('debug')('socialdb');
  */
 const STATE_KEY = {
   accepted: 'accepted',
+  blocked: 'blocked',
   invited: 'invited',
   pending: 'pending',
   requested: 'requested',
@@ -91,6 +92,24 @@ class SocialDB {
         .exec((err) => {
           if (err) { reject(err); }
           debug(`Removed friendship between ${fromId} and ${toId}`);
+          return resolve();
+        });
+    });
+  }
+
+  /**
+  * block() adds `toId` to the blocked list for `fromId`.
+  * It also removes the user and user being blocked from each other's `accepted` lists.
+  */
+  block(fromId, toId) {
+    return new Promise((resolve, reject) => {
+      this.client.multi()
+        .zadd(`${this.namespace}:user:${fromId}:${STATE_KEY.blocked}`, Date.now(), toId)
+        .zrem(`${this.namespace}:user:${fromId}:${STATE_KEY.accepted}`, toId)
+        .zrem(`${this.namespace}:user:${toId}:${STATE_KEY.accepted}`, fromId)
+        .exec((err) => {
+          if (err) { reject(err); }
+          debug(`${fromId} blocked ${toId}`);
           return resolve();
         });
     });

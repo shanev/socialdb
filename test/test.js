@@ -84,6 +84,17 @@ describe('Testing SocialDB', () => {
     });
   });
 
+  describe('.block()', () => {
+    it('should block a user', (done) => {
+      sd.block('from_id', 'some_id').then(() => {
+        client.zcard('socialdb:user:from_id:blocked', (err, count) => {
+          assert.equal(count, 1);
+          done();
+        });
+      });
+    });
+  });
+
   describe('.deleteInvites()', () => {
     it('should delete all invites', (done) => {
       sd.deleteInvites('some_id').then(() => {
