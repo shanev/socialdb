@@ -33,6 +33,7 @@ Check out [Redis quickstart](https://redis.io/topics/quickstart) to install.
 * follow(fromId, toId)
 * unfollow(fromId, toId)
 * invite(userId, someId)
+* block(fromId, toId)
 * requested(userId)
 * pending(userId)
 * accepted(userId)
