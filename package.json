@@ -1,6 +1,6 @@
 {
   "name": "socialdb",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Redis-backed social graph for Node.js",
   "keywords": [
     "redis",
