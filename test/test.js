@@ -16,6 +16,11 @@ describe('Testing SocialDB', () => {
     client.flushdb();
   });
 
+  // workaround for `nyc mocha` hanging
+  after(() => {
+    process.exit(0);
+  });
+
   describe('.follow()', () => {
     describe('initial request', () => {
       it('should add users to `requested` and `pending`', (done) => {

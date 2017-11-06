@@ -17,19 +17,21 @@
     "url": "https://github.com/shanev/socialdb.git"
   },
   "dependencies": {
-    "debug": "^2.6.1",
-    "redis": "^2.7.1"
+    "debug": "^3.1.0",
+    "redis": "^2.8.0"
   },
   "scripts": {
     "redis-start": "redis-server /usr/local/etc/redis.conf &",
     "redis-stop": "redis-cli shutdown",
-    "test": "node_modules/mocha/bin/_mocha && codecov"
+    "test": "nyc mocha",
+    "coverage": "nyc report --reporter=text-lcov > coverage/coverage.lcov && ./node_modules/.bin/codecov"
   },
   "devDependencies": {
-    "codecov": "^1.0.1",
-    "eslint": "^3.16.1",
-    "eslint-config-airbnb-base": "^11.1.0",
-    "eslint-plugin-import": "^2.2.0",
-    "mocha": "^3.2.0"
+    "codecov": "^3.0.0",
+    "eslint": "^4.10.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "mocha": "^4.0.1",
+    "nyc": "^11.3.0"
   }
 }
