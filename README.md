@@ -11,23 +11,19 @@ All operations run as asynchronous atomic transactions, so the database is never
 
 ## Installation
 
-If you are using yarn:
-
 ```sh
-yarn add socialdb
+npm install socialdb
 ```
 
-or npm:
+### Run Redis server
+
+Check out [Redis quickstart](https://redis.io/topics/quickstart) to install for your platform, or use one of the many cloud providers.
+
+A convenience script is provided for macOS default Homebrew Redis installs:
 
 ```sh
-npm install socialdb --save
+npm run redis
 ```
-
-Run Redis server if running locally:
-```sh
-redis-server
-```
-Check out [Redis quickstart](https://redis.io/topics/quickstart) to install.
 
 ## API
 * follow(fromId, toId)
@@ -96,11 +92,6 @@ DEBUG=socialdb node server.js
 ## Tests
 
 ```sh
-yarn install
-# npm install works too
+npm install
 npm test
 ```
-
-## Author
-
-Shane Vitarana :: [http://shanev.me](http://shanev.me) :: [@shanev](https://twitter.com/shanev)
