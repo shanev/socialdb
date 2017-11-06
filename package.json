@@ -21,6 +21,8 @@
     "redis": "^2.7.1"
   },
   "scripts": {
+    "redis-start": "redis-server /usr/local/etc/redis.conf &",
+    "redis-stop": "redis-cli shutdown",
     "test": "istanbul cover node_modules/mocha/bin/_mocha && codecov"
   },
   "devDependencies": {
