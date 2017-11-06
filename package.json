@@ -23,14 +23,13 @@
   "scripts": {
     "redis-start": "redis-server /usr/local/etc/redis.conf &",
     "redis-stop": "redis-cli shutdown",
-    "test": "istanbul cover node_modules/mocha/bin/_mocha && codecov"
+    "test": "node_modules/mocha/bin/_mocha && codecov"
   },
   "devDependencies": {
     "codecov": "^1.0.1",
     "eslint": "^3.16.1",
     "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0",
-    "istanbul": "^0.4.5",
     "mocha": "^3.2.0"
   }
 }
